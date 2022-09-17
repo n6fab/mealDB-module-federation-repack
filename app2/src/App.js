@@ -1,87 +1,92 @@
-import React from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, { useEffect, useState, useCallback } from "react";
+import { FlatList, TextInput, StyleSheet, Button, Text, View} from "react-native";
+import axios from "axios";
 
-import {
-  Colors,
-  Header,
-} from 'react-native/Libraries/NewAppScreen';
+    const App =() => {
+    const [text, setText] = useState('');
+    const [meals, setMeals] = useState({meals: []});   
+    const [details, setDetails] = useState({details: []}); //Details
+    const renderItem = ({ item }) => <><Item title={item.strMeal} index = {item.idMeal}/></>;
+    const renderItem2 = ({  item }) => <><Item2 instruction= {item.strInstructions}/></>;
+    const [buttonRandom, setButtonRandom] = useState(false);
 
-const Section = ({ children, title }) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
 
-export default function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const getRandomMeal = useCallback(async () => {
+  await axios.get(`https://themealdb.com/api/json/v1/1/random.php`)
+    .then(res => {
+      const meals = res.data.meals;
+     setMeals({ meals });
+})
+}, []);
 
-  const backgroundStyle = {
-    flex: 1,
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  useEffect(() => {
+    if (buttonRandom) {
+      getRandomMeal().then(() => setButtonRandom(false))
+    }
+  }, [buttonRandom, getRandomMeal])
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <View
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="App 2">
-            This screen comes from <Text style={styles.highlight}>app2</Text> container.
-          </Section>
+  const Item = (meal) => {
+    const { title } = meal;
+    const { index } = meal;
+      return (
+        <View>
+          <Text onPress={()=> getDetail(index)}>{title}</Text>  
         </View>
+      );
+    };
+
+    // Details
+const getDetail = useCallback(async (index) => {
+
+  await axios.get(`https://themealdb.com/api/json/v1/1/lookup.php?i=${index}`)
+    .then(res => {
+         const details = res.data.meals;
+        setDetails({ details });
+ 
+ })});
+
+const Item2 = (detail) => {
+  const { instruction } = detail;
+    return (
+      <View>
+      <Text>{instruction}</Text>
       </View>
-    </SafeAreaView>
-  );
-};
+    );
+  };
+    
+    return (    
+        <>
+        <Text style={styles.button}>
+        <Button
+          title="Ricetta random"
+          onPress={() => { setButtonRandom(true); } } />
+      </Text>
+      <FlatList
+          data={meals.meals}
+          renderItem={renderItem}
+          keyExtractor={(meal) => meal.idMeal} />
+          <FlatList
+          data={details.details}
+          renderItem={renderItem2}
+          keyExtractor={(meal) => meal.idMeal}
+        />
+         </>
+    )
+}
+
+
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+    input: {
+      height: 40,
+      width: 100,
+      margin: 12,
+      borderWidth: 1,
+      padding: 10,
+    },
+    button: {
+      alignItems: "center",
+      padding: 10
+    },
+  });
+export default App;

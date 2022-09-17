@@ -12,19 +12,19 @@ ChunkManager.configure({
 
     switch (parentId) {
       case 'app1':
-        url = `http://localhost:9000/${chunkId}.chunk.bundle`;
+        url = `http://10.0.2.2:9000/${chunkId}.chunk.bundle`;
         break;
       case 'app2':
-        url = `http://localhost:9001/${chunkId}.chunk.bundle`;
+        url = `http://10.0.2.2:9001/${chunkId}.chunk.bundle`;
         break;
       case 'main':
       default:
         url =
           {
             // containers
-            app1: 'http://localhost:9000/app1.container.bundle',
-            app2: 'http://localhost:9001/app2.container.bundle',
-          }[chunkId] ?? `http://localhost:8081/${chunkId}.chunk.bundle`;
+            app1: 'http://10.0.2.2:9000/app1.container.bundle',
+            app2: 'http://10.0.2.2:9001/app2.container.bundle',
+          }[chunkId] ?? `http://10.0.2.2:8081/${chunkId}.chunk.bundle`;
         break;
     }
 
@@ -59,21 +59,21 @@ const App2 = React.lazy(() => loadComponent('app2', './App.js'));
 
 function App1Wrapper() {
   return (
-    <React.Suspense
+    <><ReanimatedComponent backgroundColor="green" /><React.Suspense
       fallback={<Text style={{ textAlign: 'center' }}>Loading...</Text>}
     >
       <App1 />
-    </React.Suspense>
+    </React.Suspense></>
   );
 }
 
 function App2Wrapper() {
   return (
-    <React.Suspense
+    <><ReanimatedComponent backgroundColor="red" /><React.Suspense
       fallback={<Text style={{ textAlign: 'center' }}>Loading...</Text>}
     >
       <App2 />
-    </React.Suspense>
+    </React.Suspense></>
   );
 }
 
@@ -82,7 +82,6 @@ const Tab = createBottomTabNavigator();
 export function Root() {
   return (
     <NavigationContainer>
-      <ReanimatedComponent backgroundColor="red" />
       <Tab.Navigator initialRouteName="App1">
         <Tab.Screen name="App1" component={App1Wrapper} />
         <Tab.Screen name="App2" component={App2Wrapper} />

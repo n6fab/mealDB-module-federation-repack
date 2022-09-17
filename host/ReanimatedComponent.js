@@ -19,7 +19,7 @@ export function ReanimatedComponent({ backgroundColor }) {
 
   return (
     <Animated.View
-      style={[{ width: 200, height: 200, backgroundColor }, animatedStyle]}
+      style={[{ width: 500, height: 20, backgroundColor }, animatedStyle]}
     />
   );
 }
